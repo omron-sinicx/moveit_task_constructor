@@ -49,6 +49,7 @@ using namespace moveit::task_constructor::stages;
 
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(ModifyPlanningScene)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(CurrentState)
+PYBIND11_SMART_HOLDER_TYPE_CASTERS(InitialState)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(FixedState)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(LoadedGraspPoses)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(ComputeIK)
@@ -131,6 +132,17 @@ void export_stages(pybind11::module& m) {
 
 		)")
 	    .def(py::init<const std::string&>(), "name"_a = std::string("current state"));
+
+	properties::class_<InitialState, Stage>(m, "InitialState", R"(
+			Fetch the current PlanningScene / real robot state via the ``get_planning_scene`` service.
+			Then, if given a RobotState, override the state of the planning scene.
+			Usually, this stage should be used *once* at the beginning of your pipeline to start from this initial state.
+		)")
+		.def(py::init<const std::string&>(), "name"_a = std::string("current state"))
+		.def("setState", &InitialState::setState, R"(
+			Use a RobotState to specify which state the Initial State
+			stage should have.
+		)", "state"_a);
 
 	properties::class_<FixedState, Stage>(m, "FixedState", R"(
 			Spawn a pre-defined PlanningScene state.
