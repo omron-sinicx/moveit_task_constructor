@@ -50,6 +50,7 @@ using namespace moveit::task_constructor::stages;
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(ModifyPlanningScene)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(CurrentState)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(FixedState)
+PYBIND11_SMART_HOLDER_TYPE_CASTERS(LoadedGraspPoses)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(ComputeIK)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(MoveTo)
 PYBIND11_SMART_HOLDER_TYPE_CASTERS(MoveRelative)
@@ -384,6 +385,20 @@ void export_stages(pybind11::module& m) {
 			float: Angular step distance in rad with which positions around the object are sampled.
 		)")
 	    .def(py::init<const std::string&>(), "name"_a = std::string("Generate Grasp Pose"));
+
+	properties::class_<LoadedGraspPoses, MonitoringGenerator>(m, "LoadedGraspPoses", R"(
+			LoadedGraspPoses stage derives from monitoring generator and can
+			be used to manually inject poses for grasping.  Set the desired poses
+			using the addPose function.
+		)")
+	    .property<std::vector<geometry_msgs::PoseStamped>>("poses", R"(
+			List of poses to spawn
+		)")
+	    .def(py::init<const std::string&>(), "name"_a)
+		.def("addPose", &LoadedGraspPoses::addPose, R"(
+			Add a pose.
+		)", "pose"_a)
+		;
 
 	properties::class_<GeneratePose, MonitoringGenerator>(m, "GeneratePose", R"(
 			Monitoring generator stage which can be used to generate a pose, based on solutions provided

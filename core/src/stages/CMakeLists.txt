@@ -9,6 +9,7 @@ add_library(${PROJECT_NAME}_stages
 	${PROJECT_INCLUDE}/stages/generate_random_pose.h
 	${PROJECT_INCLUDE}/stages/generate_grasp_pose.h
 	${PROJECT_INCLUDE}/stages/generate_place_pose.h
+	${PROJECT_INCLUDE}/stages/loaded_grasp_poses.h
 	${PROJECT_INCLUDE}/stages/compute_ik.h
 	${PROJECT_INCLUDE}/stages/passthrough.h
 	${PROJECT_INCLUDE}/stages/noop.h
@@ -31,6 +32,7 @@ add_library(${PROJECT_NAME}_stages
 	generate_random_pose.cpp
 	generate_grasp_pose.cpp
 	generate_place_pose.cpp
+	loaded_grasp_poses.cpp
 	compute_ik.cpp
 	passthrough.cpp
 	predicate_filter.cpp
