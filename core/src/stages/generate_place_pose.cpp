@@ -55,6 +55,7 @@ GeneratePlacePose::GeneratePlacePose(const std::string& name) : GeneratePose(nam
 	auto& p = properties();
 	p.declare<std::string>("object");
 	p.declare<bool>("allow_z_flip", false, "allow placing objects upside down");
+	p.declare<boost::any>("pregrasp", "pregrasp posture");
 }
 
 void GeneratePlacePose::onNewSolution(const SolutionBase& s) {
@@ -127,6 +128,8 @@ void GeneratePlacePose::compute() {
 				forwardProperties(*s.end(), state);  // forward properties from inner solutions
 				state.properties().set("target_pose", target_pose_msg);
 				state.properties().set("ik_frame", ik_frame);
+				if (!state.properties().hasProperty("pregrasp"))
+					properties().exposeTo(state.properties(), { "pregrasp" });
 
 				SubTrajectory trajectory;
 				trajectory.setCost(0.0);
