@@ -142,7 +142,11 @@ void export_stages(pybind11::module& m) {
 		.def("setState", &InitialState::setState, R"(
 			Use a RobotState to specify which state the Initial State
 			stage should have.
-		)", "state"_a);
+		)", "state"_a)
+		.def("updateState", &InitialState::updateState, R"(
+			Use a PlanningSceneMsg to specify which state the Initial State
+			stage should have.
+		)", "scene_diff"_a);
 
 	properties::class_<FixedState, Stage>(m, "FixedState", R"(
 			Spawn a pre-defined PlanningScene state.

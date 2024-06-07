@@ -65,6 +65,10 @@ void InitialState::setState(const moveit_msgs::RobotState& state) {
 	robot_initial_state_ = state;
 }
 
+void InitialState::updateState(const std::vector<moveit_msgs::PlanningScene>& scenes_diff) {
+	scenes_diff_ = scenes_diff;
+}
+
 bool InitialState::canCompute() const {
 	return !scene_;
 }
@@ -95,6 +99,9 @@ void InitialState::compute() {
 
 			if (!robot_initial_state_.joint_state.name.empty())
 				scene_->setCurrentState(robot_initial_state_);
+			if (!scenes_diff_.empty())
+				for (auto & scene_diff : scenes_diff_)
+					scene_->usePlanningSceneMsg(scene_diff);
 
 			spawn(InterfaceState(scene_), 0.0);
 			return;
