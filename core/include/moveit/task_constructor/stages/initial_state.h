@@ -54,13 +54,15 @@ public:
 
 	void init(const moveit::core::RobotModelConstPtr& robot_model) override;
 	void setState(const moveit_msgs::RobotState& state);
+	void updateState(const std::vector<moveit_msgs::PlanningScene>& scene_diff);
 	bool canCompute() const override;
 	void compute() override;
 
 protected:
 	moveit::core::RobotModelConstPtr robot_model_;
-	moveit_msgs::RobotState robot_initial_state_;
 	planning_scene::PlanningScenePtr scene_;
+	moveit_msgs::RobotState robot_initial_state_;
+	std::vector<moveit_msgs::PlanningScene> scenes_diff_;
 };
 }  // namespace stages
 }  // namespace task_constructor
