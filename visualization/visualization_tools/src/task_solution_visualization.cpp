@@ -190,7 +190,7 @@ void TaskSolutionVisualization::onInitialize(Ogre::SceneNode* scene_node, rviz::
 	robot_render_->setVisible(true);
 
 	scene_render_.reset(new PlanningSceneRender(main_scene_node_, context_, RobotStateVisualizationPtr()));
-	scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
+	scene_render_->getVisualGeometryNode()->setVisible(scene_enabled_property_->getBool());
 
 	marker_visual_->onInitialize(main_scene_node_, context_);
 
@@ -232,7 +232,7 @@ void TaskSolutionVisualization::reset() {
 
 	robot_render_->setVisualVisible(robot_visual_enabled_property_->getBool());
 	robot_render_->setCollisionVisible(robot_collision_enabled_property_->getBool());
-	scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
+	scene_render_->getVisualGeometryNode()->setVisible(scene_enabled_property_->getBool());
 
 	if (main_scene_node_->getParent())
 		parent_scene_node_->removeChild(main_scene_node_);
@@ -592,7 +592,7 @@ void TaskSolutionVisualization::sliderPanelVisibilityChange(bool enable) {
 void TaskSolutionVisualization::changedSceneEnabled() {
 	if (!scene_render_)
 		return;
-	setVisibility(scene_render_->getGeometryNode(), main_scene_node_, scene_enabled_property_->getBool());
+	setVisibility(scene_render_->getVisualGeometryNode(), main_scene_node_, scene_enabled_property_->getBool());
 }
 
 void TaskSolutionVisualization::renderCurrentScene() {
@@ -609,7 +609,7 @@ void TaskSolutionVisualization::setVisibility(Ogre::SceneNode* node, Ogre::Scene
 		// if main scene node became attached, also update visibility of other nodes
 		if (node == main_scene_node_) {
 			if (scene_render_)
-				setVisibility(scene_render_->getGeometryNode(), main_scene_node_, scene_enabled_property_->getBool());
+				setVisibility(scene_render_->getVisualGeometryNode(), main_scene_node_, scene_enabled_property_->getBool());
 			setVisibility(trail_scene_node_, main_scene_node_, loop_display_property_->getBool());
 		}
 	} else if (!visible && node->getParent())
