@@ -139,7 +139,8 @@ void export_core(pybind11::module& m) {
 	    .def_property_readonly("scene", &InterfaceState::scene,
 	                           "PlanningScene: PlanningScene of the state (read-only).");
 
-	py::classh<moveit::core::MoveItErrorCode>(m, "MoveItErrorCode", "Encapsulates moveit error code message")
+	py::classh<moveit::core::MoveItErrorCode>(m, "MoveItErrorCode", "Encapsulates moveit error code message",
+	                                          py::module_local())
 	    .def_readonly("val", &moveit::core::MoveItErrorCode::val, ":moveit_msgs:`MoveItErrorCodes`: error code")
 	    .def(PYBIND11_BOOL_ATTR,
 	         [](const moveit::core::MoveItErrorCode& err) { return pybind11::cast(static_cast<bool>(err)); });
