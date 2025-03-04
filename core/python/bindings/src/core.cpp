@@ -186,6 +186,12 @@ void export_core(pybind11::module& m) {
 	                               "PropertyMap: PropertyMap of the stage (read-only)")
 	        .def_property_readonly("solutions", &Stage::solutions, "Successful Solutions of the stage (read-only)")
 	        .def_property_readonly("failures", &Stage::failures, "Solutions: Failed Solutions of the stage (read-only)")
+	        .def_property_readonly("num_failures", &Stage::numFailures, "int: Number of failures encountered by this stage (read-only)")
+	        .def("explain_failure", [](const Stage& self) {
+	             std::ostringstream os;
+	             self.explainFailure(os);
+	             return os.str();
+	         }, "Get a string explanation of why the stage failed")
 	        .def<void (Stage::*)(const CostTermConstPtr&)>("setCostTerm", &Stage::setCostTerm,
 	                                                       "Specify a CostTerm for calculation of stage costs")
 	        .def(
@@ -468,6 +474,22 @@ void export_core(pybind11::module& m) {
 			Reset, init, and plan. Planning is limited to ``max_allowed_solutions``.
 			Returns if planning was successful.)")
 	    .def("preempt", &Task::preempt, "Interrupt current planning (or execution)")
+	    .def(
+	        "printState",
+	        [](const Task& self) {
+		        std::ostringstream os;
+		        self.printState(os);
+		        return os.str();
+	        },
+	        "Print current task state (number of found solutions and propagated states)")
+	    .def(
+	        "explainFailure",
+	        [](const Task& self) {
+		        std::ostringstream os;
+		        self.explainFailure(os);
+		        return os.str();
+	        },
+	        "Print an explanation for a planning failure")
 	    .def(
 	        "publish",
 	        [](Task& self, const SolutionBasePtr& solution) { self.introspection().publishSolution(*solution); },
