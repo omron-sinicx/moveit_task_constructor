@@ -119,6 +119,10 @@ void export_solvers(py::module& m) {
 	        "float: Limit joint displacement between consecutive waypoints, thus preventing jumps in joint space. "
 	        "This values specifies the fraction of mean acceptable joint motion per step.")
 	    .property<double>("min_fraction", "float: Fraction of overall distance required to succeed.")
+	    .def("setMaxVelocityScalingFactor", &CartesianPath::setMaxVelocityScalingFactor, "factor"_a,
+	         "Set the maximum velocity scaling factor")
+	    .def("setMaxAccelerationScalingFactor", &CartesianPath::setMaxAccelerationScalingFactor, "factor"_a,
+	         "Set the maximum acceleration scaling factor")
 	    .def(py::init<>());
 
 	properties::class_<MultiPlanner, PlannerInterface>(m, "MultiPlanner", R"(

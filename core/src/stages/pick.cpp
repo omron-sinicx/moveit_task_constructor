@@ -11,7 +11,8 @@ namespace moveit {
 namespace task_constructor {
 namespace stages {
 
-PickPlaceBase::PickPlaceBase(Stage::pointer&& grasp_stage, const std::string& name, bool forward)
+PickPlaceBase::PickPlaceBase(Stage::pointer&& grasp_stage, const std::string& name, bool forward,
+                            const solvers::CartesianPathPtr& solver)
   : SerialContainer(name) {
 	PropertyMap& p = properties();
 	p.declare<std::string>("object", "name of object to grasp");
@@ -22,7 +23,7 @@ PickPlaceBase::PickPlaceBase(Stage::pointer&& grasp_stage, const std::string& na
 	p.declare<std::string>("eef_group", "JMG of eef");
 	p.declare<std::string>("eef_parent_group", "JMG of eef's parent");
 
-	cartesian_solver_ = std::make_shared<solvers::CartesianPath>();
+	cartesian_solver_ = solver ? solver : std::make_shared<solvers::CartesianPath>();
 	int insertion_position = forward ? -1 : 0;  // insert children at end / front, i.e. normal or reverse order
 
 	auto init_ik_frame = [](const PropertyMap& other) -> boost::any {

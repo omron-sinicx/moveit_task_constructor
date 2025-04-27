@@ -73,7 +73,8 @@ class PickPlaceBase : public SerialContainer
 	Stage* lift_stage_ = nullptr;
 
 public:
-	PickPlaceBase(Stage::pointer&& grasp_stage, const std::string& name, bool forward);
+	PickPlaceBase(Stage::pointer&& grasp_stage, const std::string& name, bool forward,
+	             const solvers::CartesianPathPtr& solver = solvers::CartesianPathPtr());
 
 	void init(const moveit::core::RobotModelConstPtr& robot_model) override;
 
@@ -92,8 +93,9 @@ public:
 class Pick : public PickPlaceBase
 {
 public:
-	Pick(Stage::pointer&& grasp_stage = Stage::pointer(), const std::string& name = "pick")
-	  : PickPlaceBase(std::move(grasp_stage), name, true) {}
+	Pick(Stage::pointer&& grasp_stage = Stage::pointer(), const std::string& name = "pick", 
+	     const solvers::CartesianPathPtr& solver = solvers::CartesianPathPtr())
+	  : PickPlaceBase(std::move(grasp_stage), name, true, solver) {}
 
 	void setApproachMotion(const geometry_msgs::TwistStamped& motion, double min_distance, double max_distance) {
 		setApproachRetract(motion, min_distance, max_distance);
@@ -109,8 +111,9 @@ public:
 class Place : public PickPlaceBase
 {
 public:
-	Place(Stage::pointer&& ungrasp_stage = Stage::pointer(), const std::string& name = "place")
-	  : PickPlaceBase(std::move(ungrasp_stage), name, false) {}
+	Place(Stage::pointer&& ungrasp_stage = Stage::pointer(), const std::string& name = "place", 
+	      const solvers::CartesianPathPtr& solver = solvers::CartesianPathPtr())
+	  : PickPlaceBase(std::move(ungrasp_stage), name, false, solver) {}
 
 	void setRetractMotion(const geometry_msgs::TwistStamped& motion, double min_distance, double max_distance) {
 		setApproachRetract(motion, min_distance, max_distance);

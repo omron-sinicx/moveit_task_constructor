@@ -33,12 +33,14 @@
  *********************************************************************/
 
 #include "stages.h"
+#include "core.h"
 #include <moveit/python/task_constructor/properties.h>
 #include <moveit/task_constructor/stages.h>
 #include <moveit/task_constructor/stages/pick.h>
 #include <moveit/task_constructor/stages/simple_grasp.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>
+#include <moveit/task_constructor/solvers/cartesian_path.h>
 #include <pybind11/stl.h>
 #include <py_binding_tools/ros_msg_typecasters.h>
 
@@ -457,6 +459,8 @@ void export_stages(pybind11::module& m) {
 	    .property<std::string>("eef_parent_group", "str: Joint model group of the eef's parent")
 	    .def(py::init<Stage::pointer&&, const std::string&>(), "grasp_generator"_a,
 	         "name"_a = std::string("pick"))
+	    .def(py::init<Stage::pointer&&, const std::string&, const solvers::CartesianPathPtr&>(), 
+	         "grasp_generator"_a, "name"_a = std::string("pick"), "solver"_a = solvers::CartesianPathPtr())
 	    .def("setApproachMotion", &Pick::setApproachMotion, R"(
 			The approaching motion towards the grasping state is represented
 			by a twist message.
@@ -472,7 +476,11 @@ void export_stages(pybind11::module& m) {
 		)", "motion"_a, "min_distance"_a, "max_distance"_a)
 	    .def("setLiftMotion", py::overload_cast<const std::map<std::string, double>&>(&Pick::setLiftMotion), R"(
 			The lifting motion away from the grasping state is represented by its destination as joint-value pairs
-		)", "place"_a);
+		)", "place"_a)
+	    .def("cartesianSolver", &Pick::cartesianSolver, R"(
+			Get the Cartesian path solver used by this stage.
+			Returns a CartesianPath solver pointer that can be used to configure the solver's behavior.
+		)");
 
 	properties::class_<Place, SerialContainer>(m, "Place", R"(
 			The Place stage is a specialization of the PickPlaceBase class, which
@@ -514,8 +522,14 @@ void export_stages(pybind11::module& m) {
 	    .def("setPlaceMotion", py::overload_cast<const std::map<std::string, double>&>(&Place::setPlaceMotion), R"(
 			The placing motion to the final state is represented by its destination as joint-value pairs
 		)", "joints"_a )
+	    .def("cartesianSolver", &Place::cartesianSolver, R"(
+			Get the Cartesian path solver used by this stage.
+			Returns a CartesianPath solver pointer that can be used to configure the solver's behavior.
+		)")
 	    .def(py::init<Stage::pointer&&, const std::string&>(), "place_generator"_a,
-	         "name"_a = std::string("place"));
+	         "name"_a = std::string("place"))
+	    .def(py::init<Stage::pointer&&, const std::string&, const solvers::CartesianPathPtr&>(), 
+	         "place_generator"_a, "name"_a = std::string("place"), "solver"_a = solvers::CartesianPathPtr());
 
 	properties::class_<SimpleGraspBase, SerialContainer>(m, "SimpleGraspBase", "Abstract base class for grasping and releasing")
 		.property<std::string>("eef", "str: The end effector of the robot")
