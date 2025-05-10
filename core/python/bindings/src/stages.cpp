@@ -457,10 +457,30 @@ void export_stages(pybind11::module& m) {
 	    .property<std::string>("eef_frame", "str: Name of the end effector frame")
 	    .property<std::string>("eef_group", "str: Joint model group of the end effector")
 	    .property<std::string>("eef_parent_group", "str: Joint model group of the eef's parent")
-	    .def(py::init<Stage::pointer&&, const std::string&>(), "grasp_generator"_a,
-	         "name"_a = std::string("pick"))
-	    .def(py::init<Stage::pointer&&, const std::string&, const solvers::CartesianPathPtr&>(), 
-	         "grasp_generator"_a, "name"_a = std::string("pick"), "solver"_a = solvers::CartesianPathPtr())
+	    .def(py::init([](Stage::pointer&& grasp_gen, const std::string& name) {
+             return std::make_unique<Pick>(std::move(grasp_gen), name);
+         }), "grasp_generator"_a, "name"_a = std::string("pick"))
+	    .def(py::init([](py::object grasp_generator, const std::string& name, py::object solver_obj) {
+             Stage::pointer grasp_gen = grasp_generator.cast<Stage::pointer>();
+             
+             if (solver_obj.is_none()) {
+                 return std::make_unique<Pick>(std::move(grasp_gen), name);
+             } else {
+                 // First cast to PlannerInterfacePtr (base class), which works correctly
+                 auto planner_interface = solver_obj.cast<solvers::PlannerInterfacePtr>();
+                 
+                 // Then downcast to CartesianPathPtr
+                 solvers::CartesianPathPtr cartesian_solver = 
+                     std::dynamic_pointer_cast<solvers::CartesianPath>(planner_interface);
+                 
+                 // Verify the downcast worked
+                 if (!cartesian_solver) {
+                     throw std::runtime_error("Provided solver is not a CartesianPath");
+                 }
+                 
+                 return std::make_unique<Pick>(std::move(grasp_gen), name, cartesian_solver);
+             }
+         }), "grasp_generator"_a, "name"_a = std::string("pick"), "solver"_a = py::none())
 	    .def("setApproachMotion", &Pick::setApproachMotion, R"(
 			The approaching motion towards the grasping state is represented
 			by a twist message.
@@ -537,7 +557,32 @@ void export_stages(pybind11::module& m) {
 	    .def(py::init<Stage::pointer&&, const std::string&>(), "place_generator"_a,
 	         "name"_a = std::string("place"))
 	    .def(py::init<Stage::pointer&&, const std::string&, const solvers::CartesianPathPtr&>(), 
-	         "place_generator"_a, "name"_a = std::string("place"), "solver"_a = solvers::CartesianPathPtr());
+	         "place_generator"_a, "name"_a = std::string("place"), "solver"_a = solvers::CartesianPathPtr())
+	    .def(py::init([](py::object place_generator, const std::string& name, py::object solver_obj) {
+             Stage::pointer place_gen = place_generator.cast<Stage::pointer>();
+             
+             if (solver_obj.is_none()) {
+                 // Use the two-argument constructor when no solver is provided
+                 py::print("Creating Place with default solver");
+                 return std::make_unique<Place>(std::move(place_gen), name);
+             } else {
+                 try {
+                     // Use the three-argument constructor with the provided solver
+                     py::print("Attempting to cast the solver object to CartesianPathPtr for Place...");
+                     auto solver = solver_obj.cast<solvers::CartesianPathPtr>();
+                     
+                     py::print("Cast successful!");
+                     py::print("Creating Place with custom solver");
+                     return std::make_unique<Place>(std::move(place_gen), name, solver);
+                 } catch (const py::error_already_set& e) {
+                     py::print("Error casting solver object:", e.what());
+                     return std::make_unique<Place>(std::move(place_gen), name);
+                 } catch (const std::exception& e) {
+                     py::print("Exception when creating Place with custom solver:", e.what());
+                     return std::make_unique<Place>(std::move(place_gen), name);
+                 }
+             }
+         }), "place_generator"_a, "name"_a = std::string("place"), "solver"_a = py::none());
 
 	properties::class_<SimpleGraspBase, SerialContainer>(m, "SimpleGraspBase", "Abstract base class for grasping and releasing")
 		.property<std::string>("eef", "str: The end effector of the robot")
