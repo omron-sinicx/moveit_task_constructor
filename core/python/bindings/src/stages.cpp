@@ -477,7 +477,11 @@ void export_stages(pybind11::module& m) {
 	    .def("setLiftMotion", py::overload_cast<const std::map<std::string, double>&>(&Pick::setLiftMotion), R"(
 			The lifting motion away from the grasping state is represented by its destination as joint-value pairs
 		)", "place"_a)
-	    .def("cartesianSolver", &Pick::cartesianSolver, R"(
+	    .def("cartesianSolver", [](Pick& self) -> solvers::CartesianPath& {
+                return *self.cartesianSolver();
+            },
+            py::return_value_policy::reference_internal,
+            R"(
 			Get the Cartesian path solver used by this stage.
 			Returns a CartesianPath solver pointer that can be used to configure the solver's behavior.
 		)");
@@ -522,7 +526,11 @@ void export_stages(pybind11::module& m) {
 	    .def("setPlaceMotion", py::overload_cast<const std::map<std::string, double>&>(&Place::setPlaceMotion), R"(
 			The placing motion to the final state is represented by its destination as joint-value pairs
 		)", "joints"_a )
-	    .def("cartesianSolver", &Place::cartesianSolver, R"(
+	    .def("cartesianSolver", [](Place& self) -> solvers::CartesianPath& {
+                return *self.cartesianSolver();
+            },
+            py::return_value_policy::reference_internal,
+            R"(
 			Get the Cartesian path solver used by this stage.
 			Returns a CartesianPath solver pointer that can be used to configure the solver's behavior.
 		)")
